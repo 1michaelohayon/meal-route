@@ -13,21 +13,21 @@ type FoodProviderStore interface {
 	Get(context.Context) ([]*types.FoodProvider, error)
 	Insert(context.Context, *types.FoodProvider) (*types.FoodProvider, error)
 }
-type MongoFoodProvider struct {
+type MongoFoodProviderStore struct {
 	client *mongo.Client
 	coll   *mongo.Collection
 
 	FoodProviderStore
 }
 
-func NewFoodProviderwMongoStore(cl *mongo.Client) *MongoFoodProvider {
-	return &MongoFoodProvider{
+func NewMongoFoodProviderStore(cl *mongo.Client) *MongoFoodProviderStore {
+	return &MongoFoodProviderStore{
 		client: cl,
 		coll:   cl.Database(DBNAME).Collection("food-providers"),
 	}
 }
 
-func (s *MongoFoodProvider) Insert(ctx context.Context, fp *types.FoodProvider) (*types.FoodProvider, error) {
+func (s *MongoFoodProviderStore) Insert(ctx context.Context, fp *types.FoodProvider) (*types.FoodProvider, error) {
 	stored, err := s.coll.InsertOne(ctx, fp)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (s *MongoFoodProvider) Insert(ctx context.Context, fp *types.FoodProvider) 
 	return fp, nil
 }
 
-func (s *MongoFoodProvider) Get(ctx context.Context) ([]*types.FoodProvider, error) {
+func (s *MongoFoodProviderStore) Get(ctx context.Context) ([]*types.FoodProvider, error) {
 	curs, err := s.coll.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
@@ -46,5 +46,5 @@ func (s *MongoFoodProvider) Get(ctx context.Context) ([]*types.FoodProvider, err
 		return nil, err
 	}
 
-	return providers, err
+	return providers, nil
 }

@@ -20,9 +20,9 @@ type FoodProviderHandler struct {
 	store db.FoodProviderStore
 }
 
-func NewFoodProviderHandler(fps db.FoodProviderStore) *FoodProviderHandler {
+func NewFoodProviderHandler(s db.FoodProviderStore) *FoodProviderHandler {
 	return &FoodProviderHandler{
-		store: fps,
+		store: s,
 	}
 }
 
@@ -38,7 +38,7 @@ func (h *FoodProviderHandler) GetAll(ctx *fiber.Ctx) error {
 	return ctx.JSON(foodProviders)
 }
 
-func validate(params *types.FoodProvider) (*types.FoodProvider, map[string]string) {
+func validateFP(params *types.FoodProvider) (*types.FoodProvider, map[string]string) {
 	errMap := map[string]string{}
 	if len(params.Name) < minNameLen || len(params.Name) > maxNameLen {
 		errMap["name"] = fmt.Sprintf("name must be between %d and %d", minNameLen, maxNameLen)
@@ -63,7 +63,7 @@ func (h *FoodProviderHandler) Post(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(&params); err != nil {
 		return fiber.ErrBadRequest
 	}
-	fp, errors := validate(&params)
+	fp, errors := validateFP(&params)
 	if len(errors) != 0 {
 		return ctx.Status(fiber.ErrBadRequest.Code).JSON(errors)
 	}

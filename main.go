@@ -17,6 +17,7 @@ var (
 	app                 = fiber.New()
 	apiRoute            = app.Group("/api")
 	foodProviderHandler *api.FoodProviderHandler
+	userHandler         *api.UserHandler
 )
 
 func init() {
@@ -28,14 +29,22 @@ func init() {
 		log.Fatal(err)
 	}
 
-	foodProviderStore := db.NewFoodProviderwMongoStore(client)
+	foodProviderStore := db.NewMongoFoodProviderStore(client)
+	userStore := db.NewMongoUserStore(client)
 
 	foodProviderHandler = api.NewFoodProviderHandler(foodProviderStore)
+	userHandler = api.NewUserHandler(userStore)
 }
 
 func main() {
+	/* food-provider routes */
 	apiRoute.Get("/foodprovider", foodProviderHandler.GetAll)
 	apiRoute.Post("/foodprovider", foodProviderHandler.Post)
 
+	/* user routes  */
+	apiRoute.Get("/user", userHandler.GetAll)
+	apiRoute.Post("/user", userHandler.Post)
+
+	/* admin routes */
 	app.Listen(*listenAddr)
 }
