@@ -12,6 +12,7 @@ import (
 type FoodProviderStore interface {
 	Get(context.Context) ([]*types.FoodProvider, error)
 	Insert(context.Context, *types.FoodProvider) (*types.FoodProvider, error)
+	GetById(context.Context, string) (*types.FoodProvider, error)
 }
 type MongoFoodProviderStore struct {
 	client *mongo.Client
@@ -47,4 +48,16 @@ func (s *MongoFoodProviderStore) Get(ctx context.Context) ([]*types.FoodProvider
 	}
 
 	return providers, nil
+}
+
+func (s *MongoFoodProviderStore) GetById(ctx context.Context, id string) (*types.FoodProvider, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	var fp types.FoodProvider
+	if err := s.coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&fp); err != nil {
+		return nil, err
+	}
+	return &fp, nil
 }

@@ -31,19 +31,24 @@ func init() {
 
 	foodProviderStore := db.NewMongoFoodProviderStore(client)
 	userStore := db.NewMongoUserStore(client)
+	//riderStore := db.NewMongoRiderStore(client)
 
-	foodProviderHandler = api.NewFoodProviderHandler(foodProviderStore)
 	userHandler = api.NewUserHandler(userStore)
+	foodProviderHandler = api.NewFoodProviderHandler(foodProviderStore)
 }
 
 func main() {
 	/* food-provider routes */
 	apiRoute.Get("/foodprovider", foodProviderHandler.GetAll)
-	apiRoute.Post("/foodprovider", foodProviderHandler.Post)
+	apiRoute.Get("/foodprovider/:id", foodProviderHandler.GetOne)
+	apiRoute.Post("/foodprovider", foodProviderHandler.Add)
 
 	/* user routes  */
 	apiRoute.Get("/user", userHandler.GetAll)
-	apiRoute.Post("/user", userHandler.Post)
+	apiRoute.Post("/user", userHandler.Add)
+
+	/* rider routes */
+	//	apiRoute.Get("/:foodroviderID/rider", foodProviderHandler.)
 
 	/* admin routes */
 	app.Listen(*listenAddr)

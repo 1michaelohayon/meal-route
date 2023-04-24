@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/1michaelohayon/meal-route/db"
@@ -20,9 +21,9 @@ type FoodProviderHandler struct {
 	store db.FoodProviderStore
 }
 
-func NewFoodProviderHandler(s db.FoodProviderStore) *FoodProviderHandler {
+func NewFoodProviderHandler(f db.FoodProviderStore) *FoodProviderHandler {
 	return &FoodProviderHandler{
-		store: s,
+		store: f,
 	}
 }
 
@@ -36,6 +37,18 @@ func (h *FoodProviderHandler) GetAll(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(foodProviders)
+}
+
+func (h *FoodProviderHandler) GetOne(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	user, err := h.store.GetById(ctx.Context(), id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ctx.Status(404).JSON(map[string]string{"GetOne error": "not found"})
+		}
+		return err
+	}
+	return ctx.JSON(user)
 }
 
 func validateFP(params *types.FoodProvider) (*types.FoodProvider, map[string]string) {
@@ -58,13 +71,13 @@ func validateFP(params *types.FoodProvider) (*types.FoodProvider, map[string]str
 		Menu:     params.Menu,
 	}, nil
 }
-func (h *FoodProviderHandler) Post(ctx *fiber.Ctx) error {
+func (h *FoodProviderHandler) Add(ctx *fiber.Ctx) error {
 	var params types.FoodProvider
 	if err := ctx.BodyParser(&params); err != nil {
 		return fiber.ErrBadRequest
 	}
 	fp, errors := validateFP(&params)
-	if len(errors) != 0 {
+	if errors != nil {
 		return ctx.Status(fiber.ErrBadRequest.Code).JSON(errors)
 	}
 
