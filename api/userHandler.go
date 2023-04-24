@@ -1,9 +1,6 @@
 package api
 
 import (
-	"fmt"
-	"regexp"
-
 	"github.com/1michaelohayon/meal-route/db"
 	"github.com/1michaelohayon/meal-route/types"
 	"github.com/gofiber/fiber/v2"
@@ -39,16 +36,17 @@ func (h *UserHandler) GetAll(ctx *fiber.Ctx) error {
 }
 
 func (h *UserHandler) Add(ctx *fiber.Ctx) error {
-	var params types.User
+	var params types.NewUser
 	if err := ctx.BodyParser(&params); err != nil {
 		return fiber.ErrBadRequest
 	}
-
-	user, errors := validateUser(&params)
-	if errors != nil {
+	if errors := params.Validate(); errors != nil {
 		return ctx.Status(fiber.ErrBadRequest.Code).JSON(errors)
 	}
-
+	user, err := params.CreateUser()
+	if err != nil {
+		return err
+	}
 	insertedUser, err := h.store.Insert(ctx.Context(), user)
 	if err != nil {
 		return err
@@ -59,26 +57,3 @@ func (h *UserHandler) Add(ctx *fiber.Ctx) error {
 //TODO: get user by id, delete user, update user
 
 // inner
-func isEmailValid(e string) bool {
-	emailRegex := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
-	return emailRegex.MatchString(e)
-}
-func validateUser(params *types.User) (*types.User, map[string]string) {
-	errMap := map[string]string{}
-	if len(params.FullName) < minFullName || len(params.FullName) > maxFullName {
-		errMap["name"] = fmt.Sprintf("name must be between %d and %d", minNameLen, maxNameLen)
-	}
-	if !isEmailValid(params.Email) {
-		errMap["email"] = fmt.Sprintf("email %s is invalid", params.Email)
-	}
-	if len(errMap) != 0 {
-		return nil, errMap
-	}
-
-	return &types.User{
-		FullName:          params.FullName,
-		Email:             params.Email,
-		EncryptedPassword: "sisma", //TODO password bcrypt and JWT or somt
-		Admin:             false,
-	}, nil
-}

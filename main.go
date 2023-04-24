@@ -49,6 +49,7 @@ func main() {
 	/* rider routes */
 	apiRoute.Post("/foodprovider/:foodPorviderID/", riderHandle.Add)
 	apiRoute.Get("/foodprovider/:foodPorviderID/riders", riderHandle.GetAll)
+	apiRoute.Get("/foodprovider/:foodPorviderID/:id", riderHandle.GetOne)
 
 	/* user routes  */
 	apiRoute.Get("/user", userHandle.GetAll)

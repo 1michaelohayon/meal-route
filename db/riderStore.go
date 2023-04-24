@@ -12,6 +12,7 @@ import (
 type RiderStore interface {
 	Get(context.Context) ([]*types.Rider, error)
 	Insert(context.Context, *types.Rider) (*types.Rider, error)
+	GetById(ctx context.Context, id string) (*types.Rider, error)
 }
 type MongoRiderStore struct {
 	client *mongo.Client
@@ -48,4 +49,16 @@ func (s *MongoRiderStore) Get(ctx context.Context) ([]*types.Rider, error) {
 	}
 
 	return riders, nil
+}
+
+func (s *MongoRiderStore) GetById(ctx context.Context, id string) (*types.Rider, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	var fp types.Rider
+	if err := s.coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&fp); err != nil {
+		return nil, err
+	}
+	return &fp, nil
 }

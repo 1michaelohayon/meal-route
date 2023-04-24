@@ -55,18 +55,28 @@ func (h *RiderHandler) Add(ctx *fiber.Ctx) error {
 	return ctx.JSON(insertedRider)
 }
 
-/* not ready */
-func (h *RiderHandler) AssignUser(ctx *fiber.Ctx) error {
+func (h *RiderHandler) GetOne(ctx *fiber.Ctx) error {
 	fpID := ctx.Params("foodPorviderID")
-	//	riderId := ctx.Params(":id")
+	riderID := ctx.Params("id")
 	if _, err := h.store.Fp.GetById(ctx.Context(), fpID); err != nil {
-		return ctx.Status(404).JSON(map[string]string{"Add error": "food provider not found"})
+		return ctx.Status(404).JSON(map[string]string{"Rider->GetOne error": "food provider not found"})
 	}
 
-	var params types.Rider
-	if err := ctx.BodyParser(&params); err != nil {
-		return fiber.ErrBadRequest
-		//TODO better parse erros
+	rider, err := h.store.Rider.GetById(ctx.Context(), riderID)
+	if err != nil {
+		return fiber.ErrNotFound
+	}
+	return ctx.JSON(rider)
+}
+
+/* not ready */
+func (h *RiderHandler) AssignUser(ctx *fiber.Ctx) error {
+	//get user from context
+
+	fpID := ctx.Params("foodPorviderID")
+	//riderID := ctx.Params("id")
+	if _, err := h.store.Fp.GetById(ctx.Context(), fpID); err != nil {
+		return ctx.Status(404).JSON(map[string]string{"Rider->GetOne error": "food provider not found"})
 	}
 	return nil
 }
