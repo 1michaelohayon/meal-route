@@ -66,7 +66,7 @@ func main() {
 	apiRoute.Get("/user", userHandle.GetAll)
 	apiRoute.Get("/user/:id", userHandle.GetOne)
 
-	apiRoute.Post("/user", userHandle.Add)
+	apiRoute.Post("/user", userHandle.Add) // TODO change group, can't create new user because it's grouped with the middleware
 
 	/* admin routes */
 
@@ -75,9 +75,7 @@ func main() {
 }
 
 /* TODO:
-middleware for auth
 middleware for admin
-seed script
 tests
 finetune errors
 */
