@@ -53,13 +53,13 @@ func (params *NewUser) Validate() map[string]string {
 
 	errMap := map[string]string{}
 	if len(params.FullName) < minFullName || len(params.FullName) > maxFullName {
-		errMap["fullName"] = fmt.Sprintf("fullName must be between %d and %d", minFullName, maxFullName)
+		errMap["fullName error"] = fmt.Sprintf("fullName must be between %d and %d", minFullName, maxFullName)
 	}
 	if !validEmail.MatchString(params.Email) {
-		errMap["email"] = fmt.Sprintf("email %s is invalid", params.Email)
+		errMap["email error"] = fmt.Sprintf("email %s is invalid", params.Email)
 	}
 	if len(params.Password) < minPass || len(params.Password) > maxPass {
-		errMap["password"] = fmt.Sprintf("password must be between %d and %d", minPass, maxPass)
+		errMap["password error"] = fmt.Sprintf("password must be between %d and %d", minPass, maxPass)
 	}
 	if len(errMap) != 0 {
 		return errMap
