@@ -13,12 +13,14 @@ import (
 )
 
 var (
-	listenAddr         = flag.String("listenAddr", ":5000", "Api PORT")
-	app                = fiber.New()
-	apiRoute           = app.Group("/api")
+	listenAddr = flag.String("listenAddr", ":5000", "Api PORT")
+	app        = fiber.New()
+	apiRoute   = app.Group("/api")
+
 	foodProviderHandle *api.FoodProviderHandler
 	userHandle         *api.UserHandler
 	riderHandle        *api.RiderHandler
+	authHandle         *api.AuthHandler
 )
 
 func init() {
@@ -36,16 +38,21 @@ func init() {
 		Rider: db.NewMongoRiderStore(client),
 	}
 
+	authHandle = api.NewAuthHandler(store.User)
 	userHandle = api.NewUserHandler(store.User)
 	foodProviderHandle = api.NewFoodProviderHandler(store.Fp)
 	riderHandle = api.NewRiderHandler(store)
 }
 
 func main() {
+	/* Auth */
+	apiRoute.Post("/auth", authHandle.Authenticate)
+
 	/* food-provider routes */
 	apiRoute.Get("/foodprovider", foodProviderHandle.GetAll)
 	apiRoute.Get("/foodprovider/:id", foodProviderHandle.GetOne)
 	apiRoute.Post("/foodprovider", foodProviderHandle.Add)
+
 	/* rider routes */
 	apiRoute.Post("/foodprovider/:foodPorviderID/", riderHandle.Add)
 	apiRoute.Get("/foodprovider/:foodPorviderID/riders", riderHandle.GetAll)
@@ -53,9 +60,19 @@ func main() {
 
 	/* user routes  */
 	apiRoute.Get("/user", userHandle.GetAll)
+	apiRoute.Get("/user/:id", userHandle.GetOne)
+
 	apiRoute.Post("/user", userHandle.Add)
 
 	/* admin routes */
 	app.Listen(*listenAddr)
 
 }
+
+/* TODO:
+middleware for auth
+middleware for admin
+seed script
+tests
+finetune errors
+*/

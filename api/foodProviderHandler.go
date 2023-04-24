@@ -41,17 +41,18 @@ func (h *FoodProviderHandler) GetAll(ctx *fiber.Ctx) error {
 
 func (h *FoodProviderHandler) GetOne(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
-	user, err := h.store.GetById(ctx.Context(), id)
+	foodProvider, err := h.store.GetById(ctx.Context(), id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return ctx.Status(404).JSON(map[string]string{"GetOne error": "not found"})
+			return ctx.Status(404).JSON(map[string]string{"foodProvider->GetOne error": "not found"})
 		}
 		return err
 	}
-	return ctx.JSON(user)
+	return ctx.JSON(foodProvider)
 }
 
 func validateFP(params *types.FoodProvider) (*types.FoodProvider, map[string]string) {
+	// TODO move this func to be attached in types
 	errMap := map[string]string{}
 	if len(params.Name) < minNameLen || len(params.Name) > maxNameLen {
 		errMap["name"] = fmt.Sprintf("name must be between %d and %d", minNameLen, maxNameLen)

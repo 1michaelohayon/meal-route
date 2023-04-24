@@ -2,8 +2,12 @@ package types
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"regexp"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -42,6 +46,7 @@ func (params *NewUser) CreateUser() (*User, error) {
 	}, nil
 }
 
+/* TODO not allow duplicate emails  */
 func (params *NewUser) Validate() map[string]string {
 	validEmail := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
 
@@ -60,4 +65,25 @@ func (params *NewUser) Validate() map[string]string {
 	}
 
 	return nil
+}
+
+func (user *User) GenerateToken() string {
+	now := time.Now()
+	expires := now.Add(time.Hour * 1).Unix()
+	claims := jwt.MapClaims{
+		"id":      user.ID,
+		"email":   user.Email,
+		"expires": expires,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	secret := os.Getenv("JWT_SECRET")
+	if len(secret) == 0 {
+		log.Fatal("Secret is empty")
+	}
+	tokenStr, err := token.SignedString([]byte(secret))
+	if err != nil {
+		fmt.Println("failed to sign token with secret", err)
+	}
+	return tokenStr
 }

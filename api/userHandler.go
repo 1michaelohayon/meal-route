@@ -7,24 +7,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-const (
-	minFullName = 3
-	maxFullName = 75
-	minPass     = 7
-	maxPass     = 40
-)
-
 type UserHandler struct {
-	store db.UserStore
+	uStore db.UserStore
 }
 
 func NewUserHandler(s db.UserStore) *UserHandler {
 	return &UserHandler{
-		store: s,
+		uStore: s,
 	}
 }
 func (h *UserHandler) GetAll(ctx *fiber.Ctx) error {
-	users, err := h.store.Get(ctx.Context())
+	users, err := h.uStore.Get(ctx.Context())
 	if err != nil {
 		if err == mongo.ErrNilDocument {
 			return ctx.JSON([]types.User{})
@@ -47,13 +40,22 @@ func (h *UserHandler) Add(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	insertedUser, err := h.store.Insert(ctx.Context(), user)
+	insertedUser, err := h.uStore.Insert(ctx.Context(), user)
 	if err != nil {
 		return err
 	}
 	return ctx.JSON(insertedUser)
 }
 
-//TODO: get user by id, delete user, update user
+func (h *UserHandler) GetOne(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	if _, err := h.uStore.GetById(ctx.Context(), id); err != nil {
+		return ctx.Status(404).JSON(map[string]string{"User->GetOne error": "not found"})
+	}
 
-// inner
+	user, err := h.uStore.GetById(ctx.Context(), id)
+	if err != nil {
+		return fiber.ErrNotFound
+	}
+	return ctx.JSON(user)
+}
