@@ -20,10 +20,10 @@ type Location struct {
 }
 
 type FoodProvider struct {
-	ID       primitive.ObjectID   `bson:"_id,omitempty" json:"id,omitempty"`
-	Name     string               `bson:"name" json:"name"`
-	Menu     []string             `bson:"menu" json:"menu"` // TODO expend to struct
-	Location Location             `bson:"location" json:"location"`
+	ID       primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	Name     string             `bson:"name" json:"name"`
+	Menu     []string           `bson:"menu" json:"menu"` // TODO expend to struct
+	Location `bson:"location" json:"location"`
 	Riders   []primitive.ObjectID `bson:"riders" json:"riders"`
 }
 type NewFoodProvider struct {
@@ -32,22 +32,13 @@ type NewFoodProvider struct {
 	Location Location `bson:"location" json:"location"`
 }
 
-type Rider struct { // move soon
-	ID             primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	UserId         primitive.ObjectID `bson:"UserId,omitempty" json:"UserId,omitempty"`
-	FoodProviderID primitive.ObjectID `bson:"foodProvider,omitempty" json:"foodProvider,omitempty"`
-	Destination    Location           `bson:"Destination,omitempty" json:"Destination,omitempty"`
-	Available      bool               `bson:"available" json:"available"`
-	Location
-}
-
 func (params *NewFoodProvider) Validate() map[string]string {
 	errMap := map[string]string{}
 	if len(params.Name) < minNameLen || len(params.Name) > maxNameLen {
-		errMap["name"] = fmt.Sprintf("name must be between %d and %d", minNameLen, maxNameLen)
+		errMap["name error"] = fmt.Sprintf("name must be between %d and %d", minNameLen, maxNameLen)
 	}
 	if len(params.Location.Address) < minNameLen || len(params.Location.Address) > maxNameLen {
-		errMap["address"] = fmt.Sprintf("address must be between %d and %d", minAddrLen, maxAddrLen)
+		errMap["address error"] = fmt.Sprintf("address must be between %d and %d", minAddrLen, maxAddrLen)
 	}
 
 	if len(errMap) != 0 {

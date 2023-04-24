@@ -2,7 +2,9 @@ package tests
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"log"
 	"net/http/httptest"
 	"testing"
 
@@ -18,8 +20,8 @@ var (
 		Password: "sisma123",
 	}
 	_invalidUser = types.NewUser{
-		Email:    "abc@gmaimadad22",
-		FullName: "Vr",
+		Email:    "WRONG",
+		FullName: "z",
 		Password: "si",
 	}
 )
@@ -43,21 +45,25 @@ func TestAddValidUser(t *testing.T) {
 	}
 
 	if resp.StatusCode != 200 {
-		t.Errorf("\nexpected:\t200 status but have %s\n", resp.Status)
+		t.Errorf("\nexpected: 200 status but have %s\n", resp.Status)
 	}
 
 	json.NewDecoder(resp.Body).Decode(&have)
 	if len(have.ID) == 0 {
-		t.Errorf("\nexpected:\tuser ID to be set\n")
+		t.Errorf("\nexpected: user ID to be set\n")
 	}
 	if len(have.EncryptedPassword) > 0 {
-		t.Errorf("\nexpected:\tencryptedpassword not to be included in the json resp\n")
+		t.Errorf("\nexpected: encryptedpassword not to be included in the json resp\n")
 	}
 	if have.Email != _validUser.Email {
-		t.Errorf("\nexpected\tEmail %s but have %s\n", _validUser.Email, have.Email)
+		t.Errorf("\nexpected Email %s but have %s\n", _validUser.Email, have.Email)
 	}
 	if have.FullName != _validUser.FullName {
-		t.Errorf("\nexpected:\tFullName %s but have %s", _validUser.FullName, have.FullName)
+		t.Errorf("\nexpected: FullName %s but have %s", _validUser.FullName, have.FullName)
+	}
+
+	if _, err = tdb.User.GetById(context.TODO(), have.ID.Hex()); err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -80,14 +86,23 @@ func TestAddInvalidUser(t *testing.T) {
 	}
 
 	if resp.StatusCode != 400 {
-		t.Errorf("\nexpected:\t400 status but have %s\n", resp.Status)
+		t.Errorf("\nexpected: 400 status but have %s\n", resp.Status)
 	}
 
 	json.NewDecoder(resp.Body).Decode(&have)
 	if len(have.Email) != 0 {
-		t.Errorf("\nexpected:\tempty but have %s\n", have.Email)
+		t.Errorf("\nexpected: empty but have %s\n", have.Email)
 	}
 	if len(have.FullName) != 0 {
-		t.Errorf("\nexpected:\tempty but have %s\n", have.FullName)
+		t.Errorf("\nexpected: empty but have %s\n", have.FullName)
+	}
+
+	users, err := tdb.User.Get(context.TODO())
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(users) != 0 {
+		t.Errorf("\nexpected: 0 users but have %d", len(users))
 	}
 }
