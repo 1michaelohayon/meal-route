@@ -13,6 +13,7 @@ type FoodProviderStore interface {
 	Get(context.Context) ([]*types.FoodProvider, error)
 	Insert(context.Context, *types.FoodProvider) (*types.FoodProvider, error)
 	GetById(context.Context, string) (*types.FoodProvider, error)
+	PutRider(ctx context.Context, fpId, riderID primitive.ObjectID) error
 }
 type MongoFoodProviderStore struct {
 	client *mongo.Client
@@ -33,7 +34,7 @@ func (s *MongoFoodProviderStore) Insert(ctx context.Context, fp *types.FoodProvi
 	if err != nil {
 		return nil, err
 	}
-	fp.ID = stored.InsertedID.(primitive.ObjectID).Hex()
+	fp.ID = stored.InsertedID.(primitive.ObjectID)
 	return fp, nil
 }
 
@@ -60,4 +61,13 @@ func (s *MongoFoodProviderStore) GetById(ctx context.Context, id string) (*types
 		return nil, err
 	}
 	return &fp, nil
+}
+
+func (s *MongoFoodProviderStore) PutRider(ctx context.Context, id, riderID primitive.ObjectID) error {
+	filter := map[string]primitive.ObjectID{"_id": id}
+	update := map[string]bson.M{"$push": {"riders": riderID}}
+	if _, err := s.coll.UpdateOne(ctx, filter, update); err != nil {
+		return err
+	}
+	return nil
 }

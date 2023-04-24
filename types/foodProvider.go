@@ -9,7 +9,7 @@ type Location struct {
 }
 
 type FoodProvider struct {
-	ID       string               `bson:"_id,omitempty" json:"id,omitempty"`
+	ID       primitive.ObjectID   `bson:"_id,omitempty" json:"id,omitempty"`
 	Name     string               `bson:"name" json:"name"`
 	Menu     []string             `bson:"menu" json:"menu"`
 	Location Location             `bson:"location" json:"location"`
@@ -17,10 +17,10 @@ type FoodProvider struct {
 }
 
 type Rider struct {
-	ID             string               `bson:"_id,omitempty" json:"id,omitempty"`
-	UserId         primitive.ObjectID   `bson:"UserId,omitempty" json:"UserId,omitempty"`
-	FoodProviderID []primitive.ObjectID `bson:"foodProvider,omitempty" json:"foodProvider,omitempty"`
-	Destination    Location             `bson:"Destination,omitempty" json:"Destination,omitempty"`
-
+	ID             primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	UserId         primitive.ObjectID `bson:"UserId,omitempty" json:"UserId,omitempty"`
+	FoodProviderID primitive.ObjectID `bson:"foodProvider,omitempty" json:"foodProvider,omitempty"`
+	Destination    Location           `bson:"Destination,omitempty" json:"Destination,omitempty"`
+	Available      bool               `bson:"available" json:"available"`
 	Location
 }

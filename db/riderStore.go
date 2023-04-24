@@ -23,7 +23,7 @@ type MongoRiderStore struct {
 func NewMongoRiderStore(cl *mongo.Client) *MongoRiderStore {
 	return &MongoRiderStore{
 		client: cl,
-		coll:   cl.Database(DBNAME).Collection("ridrers"),
+		coll:   cl.Database(DBNAME).Collection("riders"),
 	}
 }
 
@@ -32,8 +32,9 @@ func (s *MongoRiderStore) Insert(ctx context.Context, rider *types.Rider) (*type
 	if err != nil {
 		return nil, err
 	}
-	rider.ID = stored.InsertedID.(primitive.ObjectID).Hex()
+	rider.ID = stored.InsertedID.(primitive.ObjectID)
 	return rider, nil
+
 }
 
 func (s *MongoRiderStore) Get(ctx context.Context) ([]*types.Rider, error) {

@@ -13,11 +13,12 @@ import (
 )
 
 var (
-	listenAddr          = flag.String("listenAddr", ":5000", "The listen address of the API server")
-	app                 = fiber.New()
-	apiRoute            = app.Group("/api")
-	foodProviderHandler *api.FoodProviderHandler
-	userHandler         *api.UserHandler
+	listenAddr         = flag.String("listenAddr", ":5000", "Api PORT")
+	app                = fiber.New()
+	apiRoute           = app.Group("/api")
+	foodProviderHandle *api.FoodProviderHandler
+	userHandle         *api.UserHandler
+	riderHandle        *api.RiderHandler
 )
 
 func init() {
@@ -29,27 +30,31 @@ func init() {
 		log.Fatal(err)
 	}
 
-	foodProviderStore := db.NewMongoFoodProviderStore(client)
-	userStore := db.NewMongoUserStore(client)
-	//riderStore := db.NewMongoRiderStore(client)
+	store := db.Store{
+		User:  db.NewMongoUserStore(client),
+		Fp:    db.NewMongoFoodProviderStore(client),
+		Rider: db.NewMongoRiderStore(client),
+	}
 
-	userHandler = api.NewUserHandler(userStore)
-	foodProviderHandler = api.NewFoodProviderHandler(foodProviderStore)
+	userHandle = api.NewUserHandler(store.User)
+	foodProviderHandle = api.NewFoodProviderHandler(store.Fp)
+	riderHandle = api.NewRiderHandler(store)
 }
 
 func main() {
 	/* food-provider routes */
-	apiRoute.Get("/foodprovider", foodProviderHandler.GetAll)
-	apiRoute.Get("/foodprovider/:id", foodProviderHandler.GetOne)
-	apiRoute.Post("/foodprovider", foodProviderHandler.Add)
+	apiRoute.Get("/foodprovider", foodProviderHandle.GetAll)
+	apiRoute.Get("/foodprovider/:id", foodProviderHandle.GetOne)
+	apiRoute.Post("/foodprovider", foodProviderHandle.Add)
+	/* rider routes */
+	apiRoute.Post("/foodprovider/:foodPorviderID/", riderHandle.Add)
+	apiRoute.Get("/foodprovider/:foodPorviderID/riders", riderHandle.GetAll)
 
 	/* user routes  */
-	apiRoute.Get("/user", userHandler.GetAll)
-	apiRoute.Post("/user", userHandler.Add)
-
-	/* rider routes */
-	//	apiRoute.Get("/:foodroviderID/rider", foodProviderHandler.)
+	apiRoute.Get("/user", userHandle.GetAll)
+	apiRoute.Post("/user", userHandle.Add)
 
 	/* admin routes */
 	app.Listen(*listenAddr)
+
 }
