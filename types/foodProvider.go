@@ -11,7 +11,7 @@ type Location struct {
 type FoodProvider struct {
 	ID       primitive.ObjectID   `bson:"_id,omitempty" json:"id,omitempty"`
 	Name     string               `bson:"name" json:"name"`
-	Menu     []string             `bson:"menu" json:"menu"`
+	Menu     []string             `bson:"menu" json:"menu"` // TODO expend to struct
 	Location Location             `bson:"location" json:"location"`
 	Riders   []primitive.ObjectID `bson:"riders" json:"riders"`
 }

@@ -7,15 +7,17 @@ import (
 
 	"github.com/1michaelohayon/meal-route/api"
 	"github.com/1michaelohayon/meal-route/db"
+	"github.com/1michaelohayon/meal-route/middleware"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var (
-	listenAddr = flag.String("listenAddr", ":5000", "Api PORT")
+	listenAddr = flag.String("listenAddr", ":5000", "server PORT")
 	app        = fiber.New()
-	apiRoute   = app.Group("/api")
+
+	apiRoute fiber.Router
 
 	foodProviderHandle *api.FoodProviderHandler
 	userHandle         *api.UserHandler
@@ -42,11 +44,13 @@ func init() {
 	userHandle = api.NewUserHandler(store.User)
 	foodProviderHandle = api.NewFoodProviderHandler(store.Fp)
 	riderHandle = api.NewRiderHandler(store)
+
+	apiRoute = app.Group("/api", middleware.JWTAuthorizeation(store.User))
 }
 
 func main() {
-	/* Auth */
-	apiRoute.Post("/auth", authHandle.Authenticate)
+	/* auth */
+	app.Post("/auth", authHandle.Authenticate)
 
 	/* food-provider routes */
 	apiRoute.Get("/foodprovider", foodProviderHandle.GetAll)
@@ -65,6 +69,7 @@ func main() {
 	apiRoute.Post("/user", userHandle.Add)
 
 	/* admin routes */
+
 	app.Listen(*listenAddr)
 
 }
