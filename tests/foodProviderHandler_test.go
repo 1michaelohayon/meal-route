@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"github.com/1michaelohayon/meal-route/api"
@@ -17,7 +18,7 @@ var (
 	_validFoodProvider = types.NewFoodProvider{
 		Name: "MakTchina",
 		Menu: []string{
-			"conr with water",
+			"corn with water",
 			"potato with canola oil",
 			"fish for cats",
 		},
@@ -102,5 +103,74 @@ func TestAddInvalidFoodProvider(t *testing.T) {
 	}
 	if len(foodProviders) != 0 {
 		t.Errorf("\nexpected: 0 foodProviders but have %d", len(foodProviders))
+	}
+}
+
+func TestGetAllFoodProvider(t *testing.T) {
+	var (
+		tdb                = setup(t)
+		app                = fiber.New()
+		foodProviderHandle = api.NewFoodProviderHandler(tdb.Store.Fp)
+		have               []types.FoodProvider
+	)
+	defer tdb.teardown(t)
+
+	app.Get("/", foodProviderHandle.GetAll)
+
+	first, err := tdb.Store.Fp.Insert(context.TODO(), _validFoodProvider.CreateFoodProvider())
+	if err != nil {
+		t.Error(err)
+	}
+	second, err := tdb.Store.Fp.Insert(context.TODO(), _validFoodProvider.CreateFoodProvider())
+	if err != nil {
+		t.Error(err)
+	}
+	req := httptest.NewRequest("GET", "/", nil)
+	req.Header.Add("Content-type", "application/json")
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Error(err)
+	}
+	json.NewDecoder(resp.Body).Decode(&have)
+
+	if len(have) != 2 {
+		t.Errorf("\nexpected: to have 2 foodProviders but have %d\n", len(have))
+	}
+
+	list := []types.FoodProvider{
+		*first, *second,
+	}
+
+	if !reflect.DeepEqual(list, have) {
+		t.Errorf("\nexpected: resp to be %+v but have %+v\n", list, have)
+	}
+}
+
+func TestGetOneFoodProvider(t *testing.T) {
+	var (
+		tdb                = setup(t)
+		app                = fiber.New()
+		foodProviderHandle = api.NewFoodProviderHandler(tdb.Store.Fp)
+		have               types.FoodProvider
+	)
+	defer tdb.teardown(t)
+
+	app.Get("/:id", foodProviderHandle.GetOne)
+
+	first, err := tdb.Store.Fp.Insert(context.TODO(), _validFoodProvider.CreateFoodProvider())
+	if err != nil {
+		t.Error(err)
+	}
+
+	req := httptest.NewRequest("GET", "/"+first.ID.Hex(), nil)
+	req.Header.Add("Content-type", "application/json")
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Error(err)
+	}
+	json.NewDecoder(resp.Body).Decode(&have)
+
+	if !reflect.DeepEqual(*first, have) {
+		t.Errorf("\nexpected: resp to be %+v but have %+v\n", *first, have)
 	}
 }

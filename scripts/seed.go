@@ -54,7 +54,7 @@ func main() {
 		}
 	}
 
-	user := addUser(&store, "Eli_Copter", true)
+	user := addUser(&store, "Eli_Copter", false)
 
 	admin := addUser(&store, "admin", true)
 

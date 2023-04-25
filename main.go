@@ -28,7 +28,7 @@ var (
 func init() {
 	flag.Parse()
 	client, err := mongo.Connect(
-		context.TODO(),
+		context.Background(),
 		options.Client().ApplyURI(db.DBURI))
 	if err != nil {
 		log.Fatal(err)
