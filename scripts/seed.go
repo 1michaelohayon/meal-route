@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	latMin = 29.4965
-	latMax = 33.2778
+	latMin = 32.554
+	latMax = 32.80
 
-	langMax = 34.2677
-	langMin = 35.8961
+	langMax = 34.96
+	langMin = 35.53
 )
 
 var store db.Store
@@ -96,8 +96,8 @@ func addFoodProvider(store *db.Store, name, menu, addr string) *types.FoodProvid
 		Riders: []primitive.ObjectID{},
 		Location: types.Location{
 			Address: addr,
-			Lat:     latMin + rand.Float64()*(latMax-langMin)*-1,
-			Lang:    langMin + rand.Float64()*(langMax-langMin)*-1,
+			Lat:     latMin + rand.Float64()*(latMax-latMin),
+			Lng:     langMin + rand.Float64()*(langMax-langMin),
 		},
 	}
 
@@ -120,14 +120,14 @@ func AddRider(store *db.Store, addr, destAddr string, uid, fid primitive.ObjectI
 		FoodProviderID: uid,
 		Destination: types.Location{
 			Address: destAddr,
-			Lat:     latMin + rand.Float64()*(latMax-langMin)*-1,
-			Lang:    langMin + rand.Float64()*(langMax-langMin)*-1,
+			Lat:     latMin + rand.Float64()*(latMax-latMin),
+			Lng:     langMin + rand.Float64()*(langMax-langMin),
 		},
 		Available: a,
 		Location: types.Location{
 			Address: addr,
-			Lat:     latMin + rand.Float64()*(latMax-langMin)*-1,
-			Lang:    langMin + rand.Float64()*(langMax-langMin)*-1,
+			Lat:     latMin + rand.Float64()*(latMax-latMin),
+			Lng:     langMin + rand.Float64()*(langMax-langMin),
 		},
 	}
 

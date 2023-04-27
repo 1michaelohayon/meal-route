@@ -19,12 +19,12 @@ var (
 		Location: types.Location{
 			Address: "haifa",
 			Lat:     3.425235,
-			Lang:    1.2,
+			Lng:     1.2,
 		},
 		Destination: types.Location{
 			Address: "haifa",
 			Lat:     2.425235,
-			Lang:    1.5,
+			Lng:     1.5,
 		},
 	}
 )

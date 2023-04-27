@@ -13,6 +13,7 @@ type RiderStore interface {
 	Get(context.Context) ([]*types.Rider, error)
 	Insert(context.Context, *types.Rider) (*types.Rider, error)
 	GetById(ctx context.Context, id string) (*types.Rider, error)
+	UpdateLocation(ctx context.Context, pos types.Location, id string) error
 }
 type MongoRiderStore struct {
 	client *mongo.Client
@@ -61,4 +62,17 @@ func (s *MongoRiderStore) GetById(ctx context.Context, id string) (*types.Rider,
 		return nil, err
 	}
 	return &fp, nil
+}
+
+func (s *MongoRiderStore) UpdateLocation(ctx context.Context, pos types.Location, id string) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	filter := map[string]primitive.ObjectID{"_id": oid}
+	update := map[string]bson.M{"$set": {"location": pos}}
+	if _, err := s.coll.UpdateOne(ctx, filter, update); err != nil {
+		return err
+	}
+	return nil
 }

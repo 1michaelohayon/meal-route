@@ -76,9 +76,31 @@ func (h *RiderHandler) AssignUser(ctx *fiber.Ctx) error {
 	fpID := ctx.Params("foodPorviderID")
 	//riderID := ctx.Params("id")
 	if _, err := h.store.Fp.GetById(ctx.Context(), fpID); err != nil {
-		return ctx.Status(404).JSON(map[string]string{"Rider->GetOne error": "food provider not found"})
+		return ctx.Status(404).JSON(map[string]string{"Rider->AssignUser error": "food provider not found"})
 	}
 	return nil
+}
+
+func (h *RiderHandler) SetPosition(ctx *fiber.Ctx) error {
+	fpID := ctx.Params("foodPorviderID")
+	riderID := ctx.Params("id")
+
+	if _, err := h.store.Fp.GetById(ctx.Context(), fpID); err != nil {
+		return ctx.Status(404).JSON(map[string]string{"Rider->SetPosition error": "food provider not found"})
+	}
+
+	//TODO validate location
+
+	var params types.Location
+	if err := ctx.BodyParser(&params); err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	if err := h.store.Rider.UpdateLocation(ctx.Context(), params, riderID); err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	return ctx.SendStatus(204)
 }
 
 /*

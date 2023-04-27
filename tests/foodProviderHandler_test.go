@@ -25,7 +25,7 @@ var (
 		Location: types.Location{
 			Address: "negev",
 			Lat:     30.015463740207814,
-			Lang:    36.20807917170951,
+			Lng:     36.20807917170951,
 		},
 	}
 	_InvalidFoodProvider = types.NewFoodProvider{
