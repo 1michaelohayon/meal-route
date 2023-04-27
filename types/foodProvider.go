@@ -16,7 +16,7 @@ const (
 type Location struct {
 	Address string  `bson:"address,omitempty" json:"address,omitempty"`
 	Lat     float64 `bson:"lat,omitempty" json:"lat,omitempty"`
-	Lng     float64 `bson:"lang,omitempty" json:"lang,omitempty"`
+	Lng     float64 `bson:"lng,omitempty" json:"lng,omitempty"`
 }
 
 type FoodProvider struct {

@@ -9,6 +9,7 @@ import (
 	"github.com/1michaelohayon/meal-route/db"
 	"github.com/1michaelohayon/meal-route/middleware"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -45,10 +46,13 @@ func init() {
 	foodProviderHandle = api.NewFoodProviderHandler(store.Fp)
 	riderHandle = api.NewRiderHandler(store)
 
+	app.Use(cors.New())
+
 	apiRoute = app.Group("/api", middleware.JWTAuthorizeation(store.User))
 }
 
 func main() {
+
 	/* auth */
 	app.Post("/auth", authHandle.Authenticate)
 
@@ -64,12 +68,9 @@ func main() {
 	apiRoute.Put("/foodprovider/:foodPorviderID/:id", riderHandle.SetPosition)
 
 	/* user routes  */
-	apiRoute.Get("/user", userHandle.GetAll)
+	app.Post("/signup", userHandle.Add)
+	apiRoute.Get("/user", middleware.AdminAuth, userHandle.GetAll) /* admin route */
 	apiRoute.Get("/user/:id", userHandle.GetOne)
-
-	apiRoute.Post("/user", userHandle.Add) // TODO change group, can't create new user because it's grouped with the middleware
-
-	/* admin routes */
 
 	app.Listen(*listenAddr)
 }
