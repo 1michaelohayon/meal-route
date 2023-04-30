@@ -46,5 +46,5 @@ func (h *AuthHandler) Authenticate(ctx *fiber.Ctx) error {
 		return ctx.Status(401).JSON(map[string]string{"Authenticate error": "invalid credentials"})
 	}
 
-	return ctx.JSON(map[string]string{"token": user.GenerateToken()})
+	return ctx.JSON(map[string]string{"token": user.GenerateToken(), "fullName": user.FullName})
 }

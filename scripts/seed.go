@@ -56,10 +56,13 @@ func main() {
 
 	user := addUser(&store, "Eli_Copter", false)
 
-	admin := addUser(&store, "admin", true)
+	admin := addUser(&store, "a", true)
+
+	fp := addFoodProvider(&store, "Israel", "item", "haifa")
+	rider := AddRider(&store, "Israel", "Israel", user.ID, fp.ID)
 
 	fmt.Println("admin token -->", admin.GenerateToken())
-	fmt.Printf("\n%s --> %s\n", user.Email, user.GenerateToken())
+	fmt.Printf("\ntoken:\t%s\n\nfpid:\t%s\nRider:\t%s\n", user.GenerateToken(), fp.ID.Hex(), rider.ID.Hex())
 
 }
 

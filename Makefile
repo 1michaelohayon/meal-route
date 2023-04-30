@@ -10,3 +10,7 @@ seed:
 
 test:
 	@go test -v ./tests
+
+
+demo:
+	 @go run scripts/demo/main.go
