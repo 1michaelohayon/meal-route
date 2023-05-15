@@ -25,7 +25,7 @@ var store db.Store
 
 func init() {
 	ctx := context.Background()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(db.DBURI))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(db.GetURI()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,6 +57,8 @@ func main() {
 	user := addUser(&store, "Eli_Copter", false)
 
 	admin := addUser(&store, "a", true)
+
+	fmt.Printf("email\t%s\npassword\t%s\n", "a@a.com", "sisma_a")
 
 	fp := addFoodProvider(&store, "Israel", "item", "haifa")
 	rider := AddRider(&store, "Israel", "Israel", user.ID, fp.ID)
@@ -120,7 +122,7 @@ func AddRider(store *db.Store, addr, destAddr string, uid, fid primitive.ObjectI
 
 	r := types.Rider{
 		UserId:         uid,
-		FoodProviderID: uid,
+		FoodProviderID: fid,
 		Destination: types.Location{
 			Address: destAddr,
 			Lat:     latMin + rand.Float64()*(latMax-latMin),

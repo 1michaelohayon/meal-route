@@ -27,10 +27,11 @@ var (
 )
 
 func init() {
+	uri := db.GetURI()
 	flag.Parse()
 	client, err := mongo.Connect(
 		context.Background(),
-		options.Client().ApplyURI(db.DBURI))
+		options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatal(err)
 	}

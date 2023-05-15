@@ -11,6 +11,14 @@ seed:
 test:
 	@go test -v ./tests
 
-
 demo:
 	 @go run scripts/demo/main.go
+	 
+
+docker_build:
+	docker build -t m-route .	
+
+docker_run:
+	@docker run --link mongodb:mongodb -e PROD=true -e JWT_SECRET=____ -p 5000:5000 m-route
+
+
