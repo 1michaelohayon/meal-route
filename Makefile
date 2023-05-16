@@ -19,6 +19,6 @@ docker_build:
 	docker build -t m-route .	
 
 docker_run:
-	@docker run --link mongodb:mongodb -e PROD=true -e JWT_SECRET=____ -p 5000:5000 m-route
+	@docker run --name m-route -e PROD=true -e JWT_SECRET=____ -p 5000:5000 m-route
 
 

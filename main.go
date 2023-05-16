@@ -10,6 +10,9 @@ import (
 	"github.com/1michaelohayon/meal-route/middleware"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+
+	//"github.com/gofiber/fiber/v2/middleware/cors"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -18,7 +21,9 @@ var (
 	listenAddr = flag.String("listenAddr", ":5000", "server PORT")
 	app        = fiber.New()
 
-	apiRoute fiber.Router
+	apiRoute  fiber.Router
+	userRoute fiber.Router
+	fpRoute   fiber.Router
 
 	foodProviderHandle *api.FoodProviderHandler
 	userHandle         *api.UserHandler
@@ -47,31 +52,34 @@ func init() {
 	foodProviderHandle = api.NewFoodProviderHandler(store.Fp)
 	riderHandle = api.NewRiderHandler(store)
 
+	app.Use(logger.New())
 	app.Use(cors.New())
 
-	apiRoute = app.Group("/api", middleware.JWTAuthorizeation(store.User))
+	apiRoute = app.Group("/api")
+	fpRoute = apiRoute.Group("/foodprovider", middleware.JWTAuthorizeation(store.User))
+	userRoute = apiRoute.Group("/user", middleware.JWTAuthorizeation(store.User))
 }
 
 func main() {
 
 	/* auth */
-	app.Post("/auth", authHandle.Authenticate)
+	apiRoute.Post("/auth", authHandle.Authenticate)
+	apiRoute.Post("/signup", userHandle.Add)
 
 	/* food-provider routes */
-	apiRoute.Get("/foodprovider", foodProviderHandle.GetAll)
-	apiRoute.Get("/foodprovider/:id", foodProviderHandle.GetOne)
-	apiRoute.Post("/foodprovider", foodProviderHandle.Add)
+	fpRoute.Get("/", foodProviderHandle.GetAll)
+	fpRoute.Get("/:id", foodProviderHandle.GetOne)
+	fpRoute.Post("/", foodProviderHandle.Add)
 
 	/* rider routes */
-	apiRoute.Post("/foodprovider/:foodPorviderID/", riderHandle.Add)
-	apiRoute.Get("/foodprovider/:foodPorviderID/riders", riderHandle.GetAll)
-	apiRoute.Get("/foodprovider/:foodPorviderID/:id", riderHandle.GetOne)
-	apiRoute.Put("/foodprovider/:foodPorviderID/:id", riderHandle.SetPosition)
+	fpRoute.Post("/:foodPorviderID/", riderHandle.Add)
+	fpRoute.Get("/:foodPorviderID/riders", riderHandle.GetAll)
+	fpRoute.Get("/:foodPorviderID/:id", riderHandle.GetOne)
+	fpRoute.Put("/:foodPorviderID/:id", riderHandle.SetPosition)
 
 	/* user routes  */
-	app.Post("/signup", userHandle.Add)
-	apiRoute.Get("/user", middleware.AdminAuth, userHandle.GetAll) /* admin route */
-	apiRoute.Get("/user/:id", userHandle.GetOne)
+	userRoute.Get("/", middleware.AdminAuth, userHandle.GetAll) /* admin route */
+	userRoute.Get("/:id", userHandle.GetOne)
 
 	app.Listen(*listenAddr)
 }
